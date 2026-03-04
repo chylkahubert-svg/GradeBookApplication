@@ -13,3 +13,15 @@ namespace GradeBook.Enums
         SixPoint
     }
 }
+
+namespace GradeBooks.Enums
+{
+    public enum GradeBookType
+    {
+        Standard,
+        Ranked,
+        ESNU,
+        OneToFour,
+        SixPoint
+    }
+}
