@@ -1,17 +1,17 @@
 ﻿using GradeBook.GradeBooks;
 using System;
-using System.Security.Cryptography.X509Certificates;
 
 namespace GradeBook.UserInterfaces
 {
     public static class StartingUserInterface
     {
         public static bool Quit = false;
+
         public static void CommandLoop()
         {
             while (!Quit)
             {
-                Console.WriteLine(string.Empty);
+                Console.WriteLine();
                 Console.WriteLine(">> What would you like to do?");
                 var command = Console.ReadLine().ToLower();
                 CommandRoute(command);
@@ -29,53 +29,61 @@ namespace GradeBook.UserInterfaces
             else if (command == "quit")
                 Quit = true;
             else
-                Console.WriteLine("{0} was not recognized, please try again.", command);
+                Console.WriteLine($"{command} was not recognized, please try again.");
         }
 
         public static void CreateCommand(string command)
         {
             var parts = command.Split(' ');
+
             if (parts.Length != 4)
             {
-                Console.WriteLine("Command not valid, Create requires a name.");
-                return;
-            }
-            var name = arguments[1];
-            var type = arguments[2].ToLower();
-            if (!bool.TryParse(arguments[3], out bool isWeighted))
-            {
-                Console.WriteLine("Invalid value for 'Weighted'. Use 'true' or 'false'.");
+                Console.WriteLine("Command not valid, Create requires a name, type of gradebook, and if it's weighted (true / false).");
                 return;
             }
 
-            BaseGradeBook gradeBook = type switch
-            {
-                "standard" => new StandardGradeBook(name, isWeighted),
-                "ranked" => new RankedGradeBook(name, isWeighted),
-                _ => null
-            };
+            var name = parts[1];
+            var type = parts[2].ToLower();
+            var weightedInput = parts[3].ToLower();
 
-            if (gradeBook == null)
+            bool isWeighted;
+
+            if (weightedInput == "true")
+                isWeighted = true;
+            else if (weightedInput == "false")
+                isWeighted = false;
+            else
             {
-                Console.WriteLine($"{type} is not a supported gradebook type.");
+                Console.WriteLine($"{weightedInput} is not a valid value for weighted, must be 'true' or 'false'.");
                 return;
             }
 
-            
-            Console.WriteLine("Created gradebook {0}.", name);
+            BaseGradeBook gradeBook;
+
+            if (type == "standard")
+                gradeBook = new StandardGradeBook(name, isWeighted);
+            else if (type == "ranked")
+                gradeBook = new RankedGradeBook(name, isWeighted);
+            else
+            {
+                Console.WriteLine($"{type} is not a supported type of gradebook, please try again.");
+                return;
+            }
+
+            Console.WriteLine($"Created gradebook {name}.");
             GradeBookUserInterface.CommandLoop(gradeBook);
         }
-
-
 
         public static void LoadCommand(string command)
         {
             var parts = command.Split(' ');
+
             if (parts.Length != 2)
             {
                 Console.WriteLine("Command not valid, Load requires a name.");
                 return;
             }
+
             var name = parts[1];
             var gradeBook = BaseGradeBook.Load(name);
 
@@ -90,7 +98,7 @@ namespace GradeBook.UserInterfaces
             Console.WriteLine();
             Console.WriteLine("GradeBook accepts the following commands:");
             Console.WriteLine();
-            Console.WriteLine("Create 'Name' - Creates a new gradebook where 'Name' is the name of the gradebook.");
+            Console.WriteLine("Create 'Name' 'Type' 'Weighted' - Creates a new gradebook where 'Name' is the name of the gradebook, 'Type' is what type of grading it should use, and 'Weighted' is whether grades should be weighted (true or false).");
             Console.WriteLine();
             Console.WriteLine("Load 'Name' - Loads the gradebook with the provided 'Name'.");
             Console.WriteLine();
@@ -100,3 +108,4 @@ namespace GradeBook.UserInterfaces
         }
     }
 }
+
