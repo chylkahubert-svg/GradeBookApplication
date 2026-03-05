@@ -1,5 +1,6 @@
 ﻿using GradeBook.GradeBooks;
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace GradeBook.UserInterfaces
 {
@@ -34,16 +35,38 @@ namespace GradeBook.UserInterfaces
         public static void CreateCommand(string command)
         {
             var parts = command.Split(' ');
-            if (parts.Length != 2)
+            if (parts.Length != 4)
             {
                 Console.WriteLine("Command not valid, Create requires a name.");
                 return;
             }
-            var name = parts[1];
-            BaseGradeBook gradeBook = new BaseGradeBook(name);
+            var name = arguments[1];
+            var type = arguments[2].ToLower();
+            if (!bool.TryParse(arguments[3], out bool isWeighted))
+            {
+                Console.WriteLine("Invalid value for 'Weighted'. Use 'true' or 'false'.");
+                return;
+            }
+
+            BaseGradeBook gradeBook = type switch
+            {
+                "standard" => new StandardGradeBook(name, isWeighted),
+                "ranked" => new RankedGradeBook(name, isWeighted),
+                _ => null
+            };
+
+            if (gradeBook == null)
+            {
+                Console.WriteLine($"{type} is not a supported gradebook type.");
+                return;
+            }
+
+            
             Console.WriteLine("Created gradebook {0}.", name);
             GradeBookUserInterface.CommandLoop(gradeBook);
         }
+
+
 
         public static void LoadCommand(string command)
         {
